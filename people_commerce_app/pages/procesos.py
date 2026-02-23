@@ -10,25 +10,21 @@ TIPOS_CIERRE = ["Contratación", "Movimiento interno", "Cancelado"]
 RESPONSABLES = ["HRBP Intern", "Business Partner"]
 
 ETAPA_COLORS = {
-    "Requerimiento":       "badge-purple",
-    "Reclutamiento":       "badge-yellow",
-    "Selección":           "badge-yellow",
-    "Oferta/Documentos":   "badge-yellow",
-    "Contratación":        "badge-green",
-    "Cerrado":             "badge-green",
+    "Requerimiento":     "badge-purple",
+    "Reclutamiento":     "badge-yellow",
+    "Selección":         "badge-yellow",
+    "Oferta/Documentos": "badge-yellow",
+    "Contratación":      "badge-green",
+    "Cerrado":           "badge-green",
 }
 
 def render(usuario: str):
-    st.markdown('<div class="section-header"> Procesos R&S</div>', unsafe_allow_html=True)
-
-    tab1, tab2, tab3 = st.tabs([" Activos", " Cerrados", " Nuevo proceso"])
-
+    st.markdown('<div class="section-header">Procesos R&S</div>', unsafe_allow_html=True)
+    tab1, tab2, tab3 = st.tabs(["Activos", "Cerrados", "Nuevo proceso"])
     with tab1:
         _render_procesos(activos=True, usuario=usuario)
-
     with tab2:
         _render_procesos(activos=False, usuario=usuario)
-
     with tab3:
         _form_nuevo_proceso(usuario)
 
@@ -39,12 +35,8 @@ def _render_procesos(activos: bool, usuario: str):
         st.markdown('<div class="alert-box alert-ok">No hay procesos registrados aún.</div>', unsafe_allow_html=True)
         return
 
-    if activos:
-        df = df[df["status"] != "Cerrado"]
-    else:
-        df = df[df["status"] == "Cerrado"]
+    df = df[df["status"] != "Cerrado"] if activos else df[df["status"] == "Cerrado"]
 
-    # Filtros
     col1, col2 = st.columns(2)
     with col1:
         filtro_area = st.selectbox("Área", ["Todas"] + AREAS, key=f"fa_{activos}")
@@ -60,7 +52,6 @@ def _render_procesos(activos: bool, usuario: str):
         st.info("Sin procesos con esos filtros.")
         return
 
-    # Calcular días en curso
     hoy = pd.Timestamp.today()
     df = df.copy()
     df["dias"] = (hoy - pd.to_datetime(df["inicio_reclutamiento"], errors="coerce")).dt.days.fillna(0).astype(int)
@@ -73,68 +64,88 @@ def _render_proceso_card(row, puede_cerrar: bool):
     etapa = row.get("etapa", "")
     badge_class = ETAPA_COLORS.get(etapa, "badge-purple")
     dias = int(row.get("dias", 0))
+    dias_color = "#E30613" if dias > 30 else ("#FFB200" if dias > 15 else "#008C45")
 
-    # Colores Heineken style
-    if dias > 30:
-        dias_color = "#E30613"   # rojo
-    elif dias > 15:
-        dias_color = "#FFB200"   # amarillo
-    else:
-        dias_color = "#008C45"   # verde
+    seleccionado_html = ""
+    if row.get("seleccionado") and str(row.get("seleccionado")) != "nan":
+        seleccionado_html = f'<span> Seleccionado: {row.get("seleccionado","")}</span>'
 
-    with st.container():
-        st.markdown(f"""
-        <div style="
-            background:#ffffff;
-            border:1px solid #e6e6e6;
-            border-left:5px solid #008C45;
-            border-radius:16px;
-            padding:1.3rem 1.5rem;
-            margin-bottom:1rem;
-            box-shadow:0 6px 18px rgba(0,0,0,0.05);
-            transition:all 0.2s ease;
-        ">
-            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.6rem;">
-                <div>
-                    <div style="
-                        font-weight:700;
-                        font-size:1.05rem;
-                        color:#111;
-                    ">
-                        {row.get('posicion','')}
-                    </div>
-                    <div style="color:#666;font-size:0.85rem;margin-top:2px;">
-                        {row.get('area','')} · {row.get('tipo_cobertura','')}  
-                        · Resp: <span style="color:#008C45;font-weight:600;">{row.get('responsable','')}</span>
-                    </div>
+    st.markdown(f"""
+    <div style="
+        background:#ffffff;
+        border:1px solid #e6e6e6;
+        border-left:5px solid #008C45;
+        border-radius:16px;
+        padding:1.3rem 1.5rem;
+        margin-bottom:1rem;
+        box-shadow:0 6px 18px rgba(0,0,0,0.05);
+    ">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.6rem;">
+            <div>
+                <div style="font-weight:700;font-size:1.05rem;color:#111;">
+                    {row.get('posicion','')}
                 </div>
-
-                <div style="text-align:right;">
-                    <span class="badge {badge_class}">{etapa}</span>
-                    <div style="
-                        font-size:0.85rem;
-                        color:{dias_color};
-                        margin-top:6px;
-                        font-weight:700;
-                    ">
-                        {dias} días en curso
-                    </div>
+                <div style="color:#666;font-size:0.85rem;margin-top:2px;">
+                    {row.get('area','')} · {row.get('tipo_cobertura','')}
+                    · Resp: <span style="color:#008C45;font-weight:600;">{row.get('responsable','')}</span>
                 </div>
             </div>
-
-            <div style="
-                font-size:0.8rem;
-                color:#555;
-                display:flex;
-                gap:1.5rem;
-                margin-top:0.4rem;
-            ">
-                <span> Reemplaza: {row.get('reemplaza','—')}</span>
-                <span> Jefe: {row.get('jefe_directo','—')}</span>
-                {f'<span> Seleccionado: {row.get("seleccionado","")}</span>' if row.get('seleccionado') and str(row.get('seleccionado')) != 'nan' else ''}
+            <div style="text-align:right;">
+                <span class="badge {badge_class}">{etapa}</span>
+                <div style="font-size:0.85rem;color:{dias_color};margin-top:6px;font-weight:700;">
+                    {dias} días en curso
+                </div>
             </div>
         </div>
-        """, unsafe_allow_html=True)
+        <div style="font-size:0.8rem;color:#555;display:flex;gap:1.5rem;margin-top:0.4rem;">
+            <span> Reemplaza: {row.get('reemplaza','—')}</span>
+            <span> Jefe: {row.get('jefe_directo','—')}</span>
+            {seleccionado_html}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    if puede_cerrar:
+        col_e, col_close = st.columns([3, 1])
+        with col_e:
+            nueva_etapa = st.selectbox(
+                "Etapa", ETAPAS,
+                index=ETAPAS.index(etapa) if etapa in ETAPAS else 0,
+                key=f"etapa_{row['id']}"
+            )
+            if nueva_etapa != etapa:
+                update_proceso(row["id"], {"etapa": nueva_etapa})
+                st.rerun()
+        with col_close:
+            st.markdown("<br>", unsafe_allow_html=True)
+            if st.button(" Cerrar", key=f"close_{row['id']}"):
+                st.session_state[f"cierre_{row['id']}"] = True
+
+        if st.session_state.get(f"cierre_{row['id']}"):
+            with st.form(f"form_cierre_{row['id']}"):
+                st.markdown("**Registrar cierre del proceso**")
+                seleccionado = st.text_input("Nombre del seleccionado *")
+                fecha_ingreso = st.date_input("Fecha de ingreso real", value=date.today())
+                tipo_cierre = st.selectbox("Tipo de cierre", TIPOS_CIERRE)
+                reemplaza = st.text_input(
+                    "¿A quién reemplaza?",
+                    value=str(row.get("reemplaza", "")) if pd.notna(row.get("reemplaza")) else "",
+                )
+                if st.form_submit_button(" Confirmar cierre"):
+                    if not seleccionado:
+                        st.error("Ingresa el nombre del seleccionado.")
+                    else:
+                        cerrar_proceso(
+                            row_id=row["id"],
+                            seleccionado=seleccionado,
+                            fecha_ingreso_real=str(fecha_ingreso),
+                            tipo_cierre=tipo_cierre,
+                            reemplaza=reemplaza if reemplaza else None
+                        )
+                        st.session_state[f"cierre_{row['id']}"] = False
+                        msg = f" y cese de **{reemplaza}** registrado." if reemplaza else "."
+                        st.success(f" Proceso cerrado. **{seleccionado}** añadido al headcount{msg}")
+                        st.rerun()
 
 
 def _form_nuevo_proceso(usuario: str):
@@ -145,8 +156,10 @@ def _form_nuevo_proceso(usuario: str):
         with col1:
             posicion = st.text_input("Posición *", placeholder="Ej: Operador de Producción")
             area = st.selectbox("Área *", AREAS)
-            responsable = st.selectbox("Responsable *", RESPONSABLES,
-                                       index=RESPONSABLES.index(usuario) if usuario in RESPONSABLES else 0)
+            responsable = st.selectbox(
+                "Responsable *", RESPONSABLES,
+                index=RESPONSABLES.index(usuario) if usuario in RESPONSABLES else 0
+            )
             tipo_cobertura = st.selectbox("Tipo de cobertura", TIPOS_COBERTURA)
         with col2:
             jefe_directo = st.text_input("Jefe directo")
@@ -162,8 +175,7 @@ def _form_nuevo_proceso(usuario: str):
             fecha_ingreso_plan = st.date_input("Fecha ingreso planificada", value=None)
             comentarios = st.text_area("Comentarios", height=80)
 
-        submitted = st.form_submit_button("Registrar proceso →")
-        if submitted:
+        if st.form_submit_button("Registrar proceso →"):
             if not posicion:
                 st.error("La posición es obligatoria.")
             else:
