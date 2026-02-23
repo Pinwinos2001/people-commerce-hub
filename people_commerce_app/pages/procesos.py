@@ -7,7 +7,7 @@ AREAS = ["Supply", "Logística", "Ventas", "Operaciones", "RRHH", "Otro"]
 ETAPAS = ["Requerimiento", "Reclutamiento", "Selección", "Oferta/Documentos", "Contratación", "Cerrado"]
 TIPOS_COBERTURA = ["Externa", "Interna"]
 TIPOS_CIERRE = ["Contratación", "Movimiento interno", "Cancelado"]
-RESPONSABLES = ["Ariana", "Jefa"]
+RESPONSABLES = ["HRBP Intern", "Business Partner"]
 
 ETAPA_COLORS = {
     "Requerimiento":       "badge-purple",
@@ -73,85 +73,68 @@ def _render_proceso_card(row, puede_cerrar: bool):
     etapa = row.get("etapa", "")
     badge_class = ETAPA_COLORS.get(etapa, "badge-purple")
     dias = int(row.get("dias", 0))
-    dias_color = "#ff5c5c" if dias > 30 else ("#ffb84d" if dias > 15 else "#4dffb8")
+
+    # Colores Heineken style
+    if dias > 30:
+        dias_color = "#E30613"   # rojo
+    elif dias > 15:
+        dias_color = "#FFB200"   # amarillo
+    else:
+        dias_color = "#008C45"   # verde
 
     with st.container():
         st.markdown(f"""
-        <div style="background:#18181f;border:1px solid #2a2a35;border-radius:10px;
-                    padding:1rem 1.2rem;margin-bottom:0.8rem;">
-            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.5rem;">
+        <div style="
+            background:#ffffff;
+            border:1px solid #e6e6e6;
+            border-left:5px solid #008C45;
+            border-radius:16px;
+            padding:1.3rem 1.5rem;
+            margin-bottom:1rem;
+            box-shadow:0 6px 18px rgba(0,0,0,0.05);
+            transition:all 0.2s ease;
+        ">
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.6rem;">
                 <div>
-                    <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;">
+                    <div style="
+                        font-weight:700;
+                        font-size:1.05rem;
+                        color:#111;
+                    ">
                         {row.get('posicion','')}
                     </div>
-                    <div style="color:#888;font-size:0.8rem;">
-                        {row.get('area','')} · {row.get('tipo_cobertura','')} · 
-                        Resp: {row.get('responsable','')}
+                    <div style="color:#666;font-size:0.85rem;margin-top:2px;">
+                        {row.get('area','')} · {row.get('tipo_cobertura','')}  
+                        · Resp: <span style="color:#008C45;font-weight:600;">{row.get('responsable','')}</span>
                     </div>
                 </div>
+
                 <div style="text-align:right;">
                     <span class="badge {badge_class}">{etapa}</span>
-                    <div style="font-size:0.8rem;color:{dias_color};margin-top:4px;font-weight:600;">
-                        {dias}d en curso
+                    <div style="
+                        font-size:0.85rem;
+                        color:{dias_color};
+                        margin-top:6px;
+                        font-weight:700;
+                    ">
+                        {dias} días en curso
                     </div>
                 </div>
             </div>
-            <div style="font-size:0.78rem;color:#666;display:flex;gap:1.5rem;">
+
+            <div style="
+                font-size:0.8rem;
+                color:#555;
+                display:flex;
+                gap:1.5rem;
+                margin-top:0.4rem;
+            ">
                 <span>👤 Reemplaza: {row.get('reemplaza','—')}</span>
                 <span>📋 Jefe: {row.get('jefe_directo','—')}</span>
                 {f'<span>🟢 Seleccionado: {row.get("seleccionado","")}</span>' if row.get('seleccionado') and str(row.get('seleccionado')) != 'nan' else ''}
             </div>
         </div>
         """, unsafe_allow_html=True)
-
-        # Editar etapa si está activo
-        if puede_cerrar:
-            col_e, col_up, col_close = st.columns([2, 1, 1])
-            with col_e:
-                nueva_etapa = st.selectbox(
-                    "Etapa",
-                    ETAPAS,
-                    index=ETAPAS.index(etapa) if etapa in ETAPAS else 0,
-                    key=f"etapa_{row['id']}"
-                )
-                if nueva_etapa != etapa:
-                    update_proceso(row["id"], {"etapa": nueva_etapa})
-                    st.rerun()
-            with col_up:
-                st.markdown("<br>", unsafe_allow_html=True)
-            with col_close:
-                st.markdown("<br>", unsafe_allow_html=True)
-                if st.button("🔒 Cerrar proceso", key=f"close_{row['id']}"):
-                    st.session_state[f"cierre_{row['id']}"] = True
-
-        # Form de cierre
-        if st.session_state.get(f"cierre_{row['id']}"):
-            with st.form(f"form_cierre_{row['id']}"):
-                st.markdown("**Registrar cierre del proceso**")
-                seleccionado = st.text_input("Nombre del seleccionado *")
-                fecha_ingreso = st.date_input("Fecha de ingreso real", value=date.today())
-                tipo_cierre = st.selectbox("Tipo de cierre", TIPOS_CIERRE)
-                reemplaza = st.text_input(
-                    "¿A quién reemplaza?",
-                    value=str(row.get("reemplaza", "")) if pd.notna(row.get("reemplaza")) else "",
-                    help="Si hay reemplazo, se registrará el cese automáticamente. Deja vacío si es NUEVO HC."
-                )
-                submitted = st.form_submit_button("✅ Confirmar cierre")
-                if submitted:
-                    if not seleccionado:
-                        st.error("Ingresa el nombre del seleccionado.")
-                    else:
-                        cerrar_proceso(
-                            row_id=row["id"],
-                            seleccionado=seleccionado,
-                            fecha_ingreso_real=str(fecha_ingreso),
-                            tipo_cierre=tipo_cierre,
-                            reemplaza=reemplaza if reemplaza else None
-                        )
-                        st.session_state[f"cierre_{row['id']}"] = False
-                        reemplaza_msg = f" y cese de **{reemplaza}** registrado automáticamente." if reemplaza else "."
-                        st.success(f"✅ Proceso cerrado. Ingresante **{seleccionado}** añadido al headcount{reemplaza_msg}")
-                        st.rerun()
 
 
 def _form_nuevo_proceso(usuario: str):

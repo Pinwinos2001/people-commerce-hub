@@ -26,8 +26,8 @@ import pandas as pd
 EMAIL_CONFIG = {
     "power_automate_url": "https://default66e853deece344dd9d66ee6bdf4159.d4.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/c7a4dd30e4844065a3b6fe0362f14ae3/triggers/manual/paths/invoke?api-version=1",  # ← la única config necesaria
     "recipients": {
-        "Ariana": "sissy.ospina@heineken.com",  # ← cambiar al correo real
-        "Jefa":   "ariana.chavez@heineken.com",   # ← cambiar al correo real
+        "HRBP Intern": "sissy.ospina@heineken.com",  # ← cambiar al correo real
+        "Business Partner": "Claudia.Bacigalupo@heineken.com",   # ← cambiar al correo real
     }
 }
 

@@ -27,7 +27,7 @@ Se abre automáticamente en tu navegador en `http://localhost:8501`
 ## 🔐 Contraseñas por defecto
 | Usuario | Contraseña |
 |---------|-----------|
-| Sissy   | supply2024 |
+| Sissy   | hrbp2024 |
 | Claudia | jefa2024   |
 
 **Cámbialas** en `utils/auth.py` antes de compartir.

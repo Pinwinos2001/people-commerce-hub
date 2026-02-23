@@ -1,7 +1,7 @@
 # Contraseñas — cámbialas antes de deployar
 USERS = {
-    "Ariana": "supply2024",
-    "Jefa":   "jefa2024",
+    "HRBP Intern": "hrbp2024",
+    "Business Partner": "businessupply2024",
 }
 
 def check_login(usuario: str, password: str) -> bool:
