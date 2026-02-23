@@ -19,9 +19,9 @@ ETAPA_COLORS = {
 }
 
 def render(usuario: str):
-    st.markdown('<div class="section-header">🔍 Procesos R&S</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-header"> Procesos R&S</div>', unsafe_allow_html=True)
 
-    tab1, tab2, tab3 = st.tabs(["📋 Activos", "✅ Cerrados", "➕ Nuevo proceso"])
+    tab1, tab2, tab3 = st.tabs([" Activos", " Cerrados", " Nuevo proceso"])
 
     with tab1:
         _render_procesos(activos=True, usuario=usuario)
@@ -129,9 +129,9 @@ def _render_proceso_card(row, puede_cerrar: bool):
                 gap:1.5rem;
                 margin-top:0.4rem;
             ">
-                <span>👤 Reemplaza: {row.get('reemplaza','—')}</span>
-                <span>📋 Jefe: {row.get('jefe_directo','—')}</span>
-                {f'<span>🟢 Seleccionado: {row.get("seleccionado","")}</span>' if row.get('seleccionado') and str(row.get('seleccionado')) != 'nan' else ''}
+                <span> Reemplaza: {row.get('reemplaza','—')}</span>
+                <span> Jefe: {row.get('jefe_directo','—')}</span>
+                {f'<span> Seleccionado: {row.get("seleccionado","")}</span>' if row.get('seleccionado') and str(row.get('seleccionado')) != 'nan' else ''}
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -186,5 +186,5 @@ def _form_nuevo_proceso(usuario: str):
                     "status": "Activo",
                     "comentarios": comentarios,
                 })
-                st.success(f"✅ Proceso registrado: {posicion} — {area}")
+                st.success(f" Proceso registrado: {posicion} — {area}")
                 st.rerun()

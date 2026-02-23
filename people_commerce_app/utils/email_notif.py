@@ -41,7 +41,7 @@ def _send_email(to_emails: list, subject: str, html_body: str, config: dict) -> 
     mailto = f"mailto:{';'.join(to_emails)}?subject={urllib.parse.quote(subject)}&body={urllib.parse.quote(body_clean)}"
     
     import streamlit as st
-    st.markdown(f'<a href="{mailto}" target="_blank"><button style="background:#c8f04a;color:#0f0f13;padding:0.5rem 1.5rem;border:none;border-radius:6px;font-weight:700;cursor:pointer;">📨 Abrir en Outlook</button></a>', unsafe_allow_html=True)
+    st.markdown(f'<a href="{mailto}" target="_blank"><button style="background:#c8f04a;color:#0f0f13;padding:0.5rem 1.5rem;border:none;border-radius:6px;font-weight:700;cursor:pointer;">Abrir en Outlook</button></a>', unsafe_allow_html=True)
     return True, "Correo listo — click en el botón para enviarlo"
 
 def _html_template(title: str, items: list[dict], color: str = "#c8f04a") -> str:
@@ -63,8 +63,17 @@ def _html_template(title: str, items: list[dict], color: str = "#c8f04a") -> str
                 border:1px solid #2a2a35;">
         <div style="background:linear-gradient(135deg,#22222c,#1a1a24);padding:28px 32px;
                     border-bottom:1px solid #2a2a35;">
-            <div style="font-size:22px;font-weight:800;color:{color};letter-spacing:-0.02em;">
-                🏢 People Supply Hub
+            <div style="font-size:22px;font-weight:800;color:{color};letter-spacing:-0.02em;display:flex;align-items:center;gap:10px;">
+                <svg width="22" height="22" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="flex:0 0 22px; display:inline-block; vertical-align:middle;">
+                    <rect x="2" y="6" width="20" height="14" rx="2" fill="{color}" />
+                    <rect x="5" y="9" width="3" height="3" fill="#FFFFFF" />
+                    <rect x="10" y="9" width="3" height="3" fill="#FFFFFF" />
+                    <rect x="15" y="9" width="3" height="3" fill="#FFFFFF" />
+                    <rect x="5" y="13" width="3" height="3" fill="#FFFFFF" />
+                    <rect x="10" y="13" width="3" height="3" fill="#FFFFFF" />
+                    <rect x="15" y="13" width="3" height="3" fill="#FFFFFF" />
+                </svg>
+                <span style="vertical-align:middle;">People Commerce Hub</span>
             </div>
             <div style="color:#888;font-size:13px;margin-top:4px;">{title}</div>
         </div>
@@ -108,9 +117,9 @@ def notif_deadlines_proximos(pendientes_df: pd.DataFrame, config: dict) -> tuple
         badge = "HOY" if dias == 0 else ("MAÑANA" if dias == 1 else f"En {dias}d")
         items.append({"nombre": row["tema"], "detalle": row["accion"][:60], "badge": badge})
 
-    html = _html_template("⚠️ Pendientes con deadline próximo", items, "#ffb84d")
+    html = _html_template(" Pendientes con deadline próximo", items, "#ffb84d")
     emails = list(config["recipients"].values())
-    return _send_email(emails, "⚠️ People Supply — Deadlines próximos", html, config)
+    return _send_email(emails, " People Commerce — Deadlines próximos", html, config)
 
 def notif_procesos_estancados(procesos_df: pd.DataFrame, config: dict, dias_limite: int = 30) -> tuple[bool, str]:
     """Avisa sobre procesos abiertos con más de N días sin cerrar."""
@@ -129,9 +138,9 @@ def notif_procesos_estancados(procesos_df: pd.DataFrame, config: dict, dias_limi
             "badge": f'{int(row["dias"])} días',
         })
 
-    html = _html_template("🔴 Procesos R&S sin cerrar", items, "#ff5c5c")
+    html = _html_template(" Procesos R&S sin cerrar", items, "#ff5c5c")
     emails = list(config["recipients"].values())
-    return _send_email(emails, "🔴 People Supply — Procesos estancados", html, config)
+    return _send_email(emails, " People Commerce — Procesos estancados", html, config)
 
 def notif_resumen_semanal(pendientes_df: pd.DataFrame, procesos_df: pd.DataFrame, config: dict) -> tuple[bool, str]:
     """Resumen semanal completo."""
@@ -147,9 +156,9 @@ def notif_resumen_semanal(pendientes_df: pd.DataFrame, procesos_df: pd.DataFrame
         {"nombre": "Procesos R&S activos",     "detalle": "Sin cerrar",               "badge": str(proc_activos)},
         {"nombre": "Ingresos este mes",        "detalle": "Procesos cerrados",        "badge": str(proc_cerrados_mes)},
     ]
-    html = _html_template("📋 Resumen semanal — People Supply", items, "#c8f04a")
+    html = _html_template(" Resumen semanal — People Commerce", items, "#c8f04a")
     emails = list(config["recipients"].values())
-    return _send_email(emails, "📋 People Supply — Resumen semanal", html, config)
+    return _send_email(emails, " People Commerce — Resumen semanal", html, config)
 
 def notif_nuevo_pendiente(tema: str, asignado_a: str, deadline: str, config: dict) -> tuple[bool, str]:
     """Avisa cuando se asigna un nuevo pendiente."""
@@ -157,5 +166,5 @@ def notif_nuevo_pendiente(tema: str, asignado_a: str, deadline: str, config: dic
     if not to_email:
         return False, f"No se encontró email para {asignado_a}"
     items = [{"nombre": tema, "detalle": f"Deadline: {deadline}", "badge": "NUEVO"}]
-    html = _html_template(f"📌 Nuevo pendiente asignado a {asignado_a}", items, "#c8f04a")
-    return _send_email([to_email], f"📌 Nuevo pendiente: {tema}", html, config)
+    html = _html_template(f" Nuevo pendiente asignado a {asignado_a}", items, "#c8f04a")
+    return _send_email([to_email], f" Nuevo pendiente: {tema}", html, config)

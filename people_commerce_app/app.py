@@ -4,7 +4,7 @@ from utils.auth import check_login
 from utils.data import init_data
 
 st.set_page_config(
-    page_title="People Supply Hub",
+    page_title="People Commerce Hub",
     page_icon=None,
     layout="wide",
     initial_sidebar_state="expanded"
@@ -133,7 +133,7 @@ if "logged_in" not in st.session_state:
 if not st.session_state.logged_in:
 
     st.markdown('<div class="login-container">', unsafe_allow_html=True)
-    st.markdown('<div class="login-title">People Supply</div>', unsafe_allow_html=True)
+    st.markdown('<div class="login-title"><img src="assets/logo_small.svg" width="28" style="vertical-align:middle;margin-right:8px;display:inline-block;"/>People Commerce Hub</div>', unsafe_allow_html=True)
     st.markdown('<div class="login-sub">Hub de gestión interno</div>', unsafe_allow_html=True)
 
     usuario = st.selectbox("Usuario", ["Selecciona...", "HRBP Intern", "Business Partner"])
@@ -156,8 +156,11 @@ usuario = st.session_state.usuario
 with st.sidebar:
     st.markdown(f"""
     <div style="padding: 1rem 0 2rem 0;">
-        <div style="font-size:1.1rem; font-weight:700;">People Supply</div>
-        <div style="color:#6B7280; font-size:0.8rem;">Hub interno</div>
+        <div style="display:flex; align-items:center; gap:8px;">
+            <img src="assets/logo_small.svg" width="28" style="display:inline-block;"/>
+            <div style="font-size:1.05rem; font-weight:700;">People Commerce Hub</div>
+        </div>
+        <div style="color:#6B7280; font-size:0.8rem; margin-top:4px;">Hub interno</div>
         <div style="margin-top:1rem; padding:0.6rem 1rem; background:#F3F4F6; border-radius:6px; font-size:0.85rem;">
             {usuario}
         </div>
