@@ -66,44 +66,43 @@ def _render_proceso_card(row, puede_cerrar: bool):
     dias = int(row.get("dias", 0))
     dias_color = "#E30613" if dias > 30 else ("#FFB200" if dias > 15 else "#008C45")
 
-    seleccionado_html = ""
-    if row.get("seleccionado") and str(row.get("seleccionado")) != "nan":
-        seleccionado_html = f'<span> Seleccionado: {row.get("seleccionado","")}</span>'
+    def _s(v, fb="—"):
+        x = str(v) if v is not None else ""
+        return x if x and x.lower() not in ("nan","none","") else fb
 
-    st.markdown(f"""
-    <div style="
-        background:#ffffff;
-        border:1px solid #e6e6e6;
-        border-left:5px solid #008C45;
-        border-radius:16px;
-        padding:1.3rem 1.5rem;
-        margin-bottom:1rem;
-        box-shadow:0 6px 18px rgba(0,0,0,0.05);
-    ">
+    pos_s  = _s(row.get("posicion"), "")
+    area_s = _s(row.get("area"), "")
+    tipo_s = _s(row.get("tipo_cobertura"), "")
+    resp_s = _s(row.get("responsable"), "")
+    remp_s = _s(row.get("reemplaza"))
+    jefe_s = _s(row.get("jefe_directo"))
+    sel_s  = _s(row.get("seleccionado"), "")
+    sel_html = f'<span> {sel_s}</span>' if sel_s and sel_s != "—" else ""
+
+    st.markdown(
+        f'''<div style="background:#fff;border:1px solid #e6e6e6;border-left:5px solid #008C45;
+        border-radius:16px;padding:1.3rem 1.5rem;margin-bottom:1rem;
+        box-shadow:0 6px 18px rgba(0,0,0,0.05);">
         <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:0.6rem;">
             <div>
-                <div style="font-weight:700;font-size:1.05rem;color:#111;">
-                    {row.get('posicion','')}
-                </div>
-                <div style="color:#666;font-size:0.85rem;margin-top:2px;">
-                    {row.get('area','')} · {row.get('tipo_cobertura','')}
-                    · Resp: <span style="color:#008C45;font-weight:600;">{row.get('responsable','')}</span>
+                <div style="font-weight:700;font-size:1.05rem;color:#111;">''' + pos_s + '''</div>
+                <div style="color:#666;font-size:0.85rem;margin-top:2px;">''' + area_s + ''' · ''' + tipo_s + ''' · Resp:
+                    <span style="color:#008C45;font-weight:600;">''' + resp_s + '''</span>
                 </div>
             </div>
             <div style="text-align:right;">
-                <span class="badge {badge_class}">{etapa}</span>
-                <div style="font-size:0.85rem;color:{dias_color};margin-top:6px;font-weight:700;">
-                    {dias} días en curso
-                </div>
+                <span class="badge ''' + badge_class + '''">''' + etapa + '''</span>
+                <div style="font-size:0.85rem;color:''' + dias_color + ''';margin-top:6px;font-weight:700;">''' + str(dias) + ''' días en curso</div>
             </div>
         </div>
         <div style="font-size:0.8rem;color:#555;display:flex;gap:1.5rem;margin-top:0.4rem;">
-            <span> Reemplaza: {row.get('reemplaza','—')}</span>
-            <span> Jefe: {row.get('jefe_directo','—')}</span>
-            {seleccionado_html}
+            <span> Reemplaza: ''' + remp_s + '''</span>
+            <span> Jefe: ''' + jefe_s + '''</span>
+            ''' + sel_html + '''
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        </div>''',
+        unsafe_allow_html=True,
+    )
 
     if puede_cerrar:
         col_e, col_close = st.columns([3, 1])
