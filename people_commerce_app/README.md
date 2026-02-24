@@ -1,5 +1,7 @@
 # 🏢 People Supply Hub
 
+Clave de subpase: 
+
 App web para gestionar pendientes, procesos de selección y headcount de ventas — sin abrir Excel.
 
 ## ⚡ Instalación (5 minutos)
